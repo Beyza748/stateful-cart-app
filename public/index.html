@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Stateful Sepet</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="card">
+    <h2>🛒 Stateful Sepet</h2>
+
+    <input type="text" id="productInput" placeholder="Ürün adı gir">
+    <button onclick="addProduct()">Ürün Ekle</button>
+
+    <h3>Sepet</h3>
+    <ul id="cart"></ul>
+
+    <button class="clear" onclick="clearCart()">Sepeti Temizle</button>
+  </div>
+
+<script>
+async function addProduct() {
+  const product = document.getElementById("productInput").value;
+
+  if (!product) {
+    alert("Ürün adı giriniz");
+    return;
+  }
+
+  await fetch("/add", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ product })
+  });
+
+  document.getElementById("productInput").value = "";
+  loadCart();
+}
+
+async function loadCart() {
+  const res = await fetch("/cart");
+  const data = await res.json();
+
+  const list = document.getElementById("cart");
+  list.innerHTML = "";
+
+  data.forEach(item => {
+    const li = document.createElement("li");
+    li.textContent = item;
+    list.appendChild(li);
+  });
+}
+
+async function clearCart() {
+  await fetch("/clear", { method: "POST" });
+  loadCart();
+}
+
+loadCart();
+</script>
+
+</body>
+</html>
