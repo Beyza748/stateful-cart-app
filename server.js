@@ -1,44 +1,36 @@
 const express = require("express");
 const session = require("express-session");
+const path = require("path");
 
 const app = express();
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// SESSION (STATEFUL)
 app.use(
   session({
-    secret: "stateful-secret",
+    secret: "secret-key",
     resave: false,
-    saveUninitialized: true
+    saveUninitialized: true,
   })
 );
 
-// Static dosyalar
-app.use(express.static("public"));
+// 🔴 SADECE public KLASÖRÜ SERVİS EDİLECEK
+app.use(express.static(path.join(__dirname, "public")));
 
-// Ürün ekle
 app.post("/add", (req, res) => {
   const { product } = req.body;
-
-  if (!req.session.cart) {
-    req.session.cart = [];
-  }
-
+  if (!req.session.cart) req.session.cart = [];
   req.session.cart.push(product);
   res.json(req.session.cart);
 });
 
-// Sepeti getir
 app.get("/cart", (req, res) => {
   res.json(req.session.cart || []);
 });
 
-// Sepeti temizle
 app.post("/clear", (req, res) => {
   req.session.cart = [];
-  res.json({ message: "Sepet temizlendi" });
+  res.json([]);
 });
 
 app.listen(3000, () => {
